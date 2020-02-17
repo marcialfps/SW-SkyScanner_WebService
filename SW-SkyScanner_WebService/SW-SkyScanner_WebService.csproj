@@ -87,6 +87,7 @@
     <Compile Include="Services\Airports\AirportWS.cs" />
     <Compile Include="Services\Planes\IPlaneWs.cs" />
     <Compile Include="Services\Planes\Model\Plane.cs" />
+    <Compile Include="Services\Planes\Model\PlaneStatus.cs" />
     <Compile Include="Services\Planes\PlaneWS.cs" />
     <Compile Include="Services\Users\IUserWs.cs" />
     <Compile Include="Services\Users\Model\User.cs" />
