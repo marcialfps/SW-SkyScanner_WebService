@@ -85,6 +85,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Airports\AirportWS.cs" />
+    <Compile Include="Services\Airports\IAirportWS.cs" />
+    <Compile Include="Services\Airports\Model\Airport.cs" />
     <Compile Include="Services\Planes\IPlaneWs.cs" />
     <Compile Include="Services\Planes\Model\Plane.cs" />
     <Compile Include="Services\Planes\Model\PlaneStatus.cs" />
@@ -92,6 +94,8 @@
     <Compile Include="Services\Users\IUserWs.cs" />
     <Compile Include="Services\Users\Model\User.cs" />
     <Compile Include="Services\Users\UserWS.cs" />
+    <Compile Include="Services\Weather\IWeatherWS.cs" />
+    <Compile Include="Services\Weather\Model\Weather.cs" />
     <Compile Include="Services\Weather\WeatherWS.cs" />
     <Compile Include="SkyScannerWS.asmx.cs">
       <DependentUpon>SkyScannerWS.asmx</DependentUpon>

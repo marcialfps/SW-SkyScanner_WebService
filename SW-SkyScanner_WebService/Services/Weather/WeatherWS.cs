@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SW_SkyScanner_WebService.Services.Weather
 {
-    public class WeatherWS
+    public class WeatherWS : IWeatherWS
     {
     }
 }
