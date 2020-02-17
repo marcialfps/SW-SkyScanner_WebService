@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SW_SkyScanner_WebService.Services.Planes
 {
-    public class PlaneWS
+    public class PlaneWS : IPlaneWs
     {
     }
 }

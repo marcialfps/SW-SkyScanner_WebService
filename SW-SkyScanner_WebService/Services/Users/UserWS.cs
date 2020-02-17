@@ -6,7 +6,7 @@ using SW_SkyScanner_WebService.Services.Users.Model;
 
 namespace SW_SkyScanner_WebService.Services.Users
 {
-    public class UserWS
+    public class UserWS : IUserWs
     {
         private HttpClient _client;
         private string _apiBaseUrl;
@@ -17,9 +17,6 @@ namespace SW_SkyScanner_WebService.Services.Users
             _apiBaseUrl = ""; // TODO url of the users web service
         }
         
-        /// <summary>
-        /// Tries to recover a user given his Id. Returns null if no user matches the Id.
-        /// </summary>
         public async Task<User> GetUser(int id)
         {
             User user = null;
@@ -32,10 +29,6 @@ namespace SW_SkyScanner_WebService.Services.Users
             return user;
         }
         
-        /// <summary>
-        /// Tries to recover a user given his username.
-        /// Returns null if no user matches the username.
-        /// </summary>
         public async Task<User> GetUser(string username)
         {
             User user = null;
@@ -48,10 +41,6 @@ namespace SW_SkyScanner_WebService.Services.Users
             return user;
         }
         
-        /// <summary>
-        /// Tries to recover a user given his username and password.
-        /// Returns null if no user matches the username or the password given is wrong.
-        /// </summary>
         public async Task<User> GetUser(string username, string password)
         {
             HttpResponseMessage response = await _client.GetAsync($"{_apiBaseUrl}/users/user/{username}");
@@ -63,11 +52,7 @@ namespace SW_SkyScanner_WebService.Services.Users
             }
             return null;
         }
-
-        /// <summary>
-        /// Tries to create a new user through a POST request.
-        /// Returns the created user if success. Throws an exception on failure.
-        /// </summary>
+        
         public async Task<User> CreateUser(User user)
         {
             HttpResponseMessage response = await _client.PostAsJsonAsync(
@@ -76,14 +61,9 @@ namespace SW_SkyScanner_WebService.Services.Users
             // Exception if the server does noe return an OK code.
             response.EnsureSuccessStatusCode(); 
 
-            // return the created user
             return user;
         }
-
-        /// <summary>
-        /// Tries to edit an existing user through a PUT request.
-        /// Returns the created user if success. Throws an exception on failure.
-        /// </summary>
+        
         public async Task<User> UpdateUser(User user)
         {
             HttpResponseMessage response = await _client.PutAsJsonAsync(
@@ -96,11 +76,18 @@ namespace SW_SkyScanner_WebService.Services.Users
             return user;
         }
 
-        public async Task<HttpStatusCode> DeleteUser(int id)
+        public async Task<bool> DeleteUser(int id)
         {
             HttpResponseMessage response = await _client.DeleteAsync(
                 $"api/products/{id}");
-            return response.StatusCode;
+            
+            // Code 204.
+            return response.StatusCode == HttpStatusCode.NoContent;
+        }
+        
+        public async Task<bool> DeleteUser(User user)
+        {
+            return await DeleteUser(user.Id);
         }
     }
 }
