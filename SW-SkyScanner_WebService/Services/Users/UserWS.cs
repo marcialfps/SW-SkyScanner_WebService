@@ -63,8 +63,8 @@ namespace SW_SkyScanner_WebService.Services.Users
             secureUser.Name = _encryptor.Encrypt(user.Name);
             secureUser.Password = _encryptor.Encrypt(user.Password);
             
-            HttpResponseMessage response = _client.PostAsJsonAsync(
-                $"{_apiBaseUrl}/users", secureUser).GetAwaiter().GetResult();
+            HttpResponseMessage response = await _client.PostAsJsonAsync(
+                $"{_apiBaseUrl}/users", secureUser);
             
             // Exception if the server does noe return an OK code.
             response.EnsureSuccessStatusCode(); 
@@ -80,8 +80,8 @@ namespace SW_SkyScanner_WebService.Services.Users
             secureUser.Name = _encryptor.Encrypt(user.Name);
             secureUser.Password = _encryptor.Encrypt(user.Password);
             
-            HttpResponseMessage response = _client.PutAsJsonAsync(
-                $"{_apiBaseUrl}/users/{user.getId()}", user).GetAwaiter().GetResult();
+            HttpResponseMessage response = await _client.PutAsJsonAsync(
+                $"{_apiBaseUrl}/users/{user.getId()}", user);
             
             response.EnsureSuccessStatusCode();
 
@@ -91,7 +91,7 @@ namespace SW_SkyScanner_WebService.Services.Users
 
         public async Task<bool> DeleteUser(int id)
         {
-            HttpResponseMessage response = _client.DeleteAsync($"api/products/{id}").GetAwaiter().GetResult();
+            HttpResponseMessage response = await _client.DeleteAsync($"api/products/{id}");
             
             // Code 204.
             return response.StatusCode == HttpStatusCode.NoContent;

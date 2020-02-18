@@ -1,10 +1,10 @@
+using SW_SkyScanner_WebService.Services.Airports.Model;
+
 namespace SW_SkyScanner_WebService.Services.Planes.Model
 {
     public class Plane
     {
         
-//        Custom properties
-
         /// <summary>
         /// Status of the plane: coordinates, altitude, etc.
         /// </summary>
@@ -18,45 +18,36 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
         /// <summary>
         /// Departure airport code
         /// </summary>
-        public string DepartureAirport => estDepartureAirport;
+        public Airport DepartureAirport { get; set; }
 
         /// <summary>
         /// Arrival airport code
         /// </summary>
-        public string ArrivalAirport => estArrivalAirport;
+        public Airport ArrivalAirport { get; set; }
+        
+        /// <summary>
+        /// Weather conditions on the plane location
+        /// </summary>
+        public Weather.Model.Weather Weather { get; set; }
 
         /// <summary>
         /// Estimated departure time in Unix time (seconds since epoch)
         /// </summary>
-        public int DepartureTime => firstSeen;
+        public int DepartureTime { get; set; }
 
         /// <summary>
         /// Estimated arrival time in Unix time (seconds since epoch)
         /// </summary>
-        public int ArrivalTime => lastseen;
+        public int ArrivalTime { get; set; }
 
         /// <summary>
         /// Estimated distance between the plane and the departure airport (meters)
         /// </summary>
-        public int DepartureDistance => estDepartureAirportHorizDistance;
+        public int DepartureDistance { get; set; }
 
         /// <summary>
         /// Estimated distance between the plane and the arrival airport (meters)
         /// </summary>
-        public int ArrivalDistance => estArrivalAirportHorizDistance;
-
-
-//        Base properties received from API. We map the API JSON response to these properties.
-        
-//        private string icao42;
-        
-        private int firstSeen;
-        private int lastseen;
-        
-        private string estDepartureAirport;
-        private string estArrivalAirport;
-        
-        private int estDepartureAirportHorizDistance;
-        private int estArrivalAirportHorizDistance;
+        public int ArrivalDistance { get; set; }
     }
 }

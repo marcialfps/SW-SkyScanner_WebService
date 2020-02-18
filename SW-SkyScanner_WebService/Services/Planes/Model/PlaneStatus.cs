@@ -1,3 +1,5 @@
+using SW_SkyScanner_WebService.Services.Airports.Model;
+
 namespace SW_SkyScanner_WebService.Services.Planes.Model
 {
     public class PlaneStatus
@@ -13,49 +15,37 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
         /// <summary>
         /// Last position update time in Unix time (seconds since epoch)
         /// </summary>
-        public int LastUpdate => time_position;
+        public int LastUpdate { get; set; }
         
         /// <summary>
-        /// Last detected longitude of the plane
+        /// Last detected location of the plane
         /// </summary>
-        public double Longitude => longitude;
-        
-        /// <summary>
-        /// Last detected latitude of the plane
-        /// </summary>
-        public double Latitude => latitude;
+        public Coordinate Location { get; set; }
 
         /// <summary>
         /// Last detected altitude of the plane
         /// </summary>
-        public double Altitude => geo_altitude;
+        public double Altitude { get; set; }
         
         /// <summary>
         /// Last detected speed of the plane
         /// </summary>
-        public double Speed => velocity;
+        public double Speed { get; set; }
         
         /// <summary>
         /// The plane is on ground or not.
         /// </summary>
-        public bool OnGround => on_ground;
+        public bool OnGround { get; set; }
+        
+        /// <summary>
+        /// Vertical rate of the plane
+        /// </summary>
+        public double VerticalRate { get; set; }
         
         /// <summary>
         /// The plane is ascending or not
         /// </summary>
-        public bool Ascending => vertical_rate > 0;
+        public bool Ascending => VerticalRate > 0;
 
-
-//        Base properties received from API. We map the API JSON response to these properties.
-        
-//        private string icao42;
-        
-        private int time_position;
-        private float longitude;
-        private float latitude;
-        private float geo_altitude;
-        private float velocity;
-        private float vertical_rate;
-        private bool on_ground;
     }
 }

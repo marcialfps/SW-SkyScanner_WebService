@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using SW_SkyScanner_WebService.Services.Airports.Model;
 using SW_SkyScanner_WebService.Services.Planes.Model;
@@ -9,32 +10,42 @@ namespace SW_SkyScanner_WebService.Services.Planes
 {
     public class PlaneWS : IPlaneWs
     {
-        public PlaneStatus GetPlaneStatus(Plane plane)
+        public Task<PlaneStatus> GetPlaneStatus(Plane plane)
+        {
+            return GetPlaneStatus(plane.Icao24);
+        }
+
+        public Task<PlaneStatus> GetPlaneStatus(string planeCode)
         {
             throw new NotImplementedException();
         }
 
-        public PlaneStatus GetPlaneStatus(string planeCode)
+        public Task<List<Plane>> GetPlanesByDeparture(Airport departureAirport)
+        {
+            return GetPlanesByDeparture(departureAirport.Code);
+        }
+
+        public Task<List<Plane>> GetPlanesByDeparture(string departureAirport)
         {
             throw new NotImplementedException();
         }
 
-        public List<Plane> GetPlanesByDeparture(Airport departureAirport)
+        public Task<List<Plane>> GetPlanesByArrival(Airport arrivalAirport)
+        {
+            return GetPlanesByArrival(arrivalAirport.Code);
+        }
+
+        public Task<List<Plane>> GetPlanesByArrival(string arrivalAirport)
         {
             throw new NotImplementedException();
         }
 
-        public List<Plane> GetPlanesByDeparture(string departureAirport)
+        public Task<List<Plane>> GetPlanesCloseToAirport(Airport airport)
         {
-            throw new NotImplementedException();
+            return GetPlanesCloseToAirport(airport.Code);
         }
 
-        public List<Plane> GetPlanesByArrival(Airport arrivalAirport)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Plane> GetPlanesByArrival(string arrivalAirport)
+        public Task<List<Plane>> GetPlanesCloseToAirport(string airport)
         {
             throw new NotImplementedException();
         }
