@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.IO;
+using System.Threading.Tasks;
 using System.Web.Services;
 using System.Web.Services.Protocols;
 using System.Xml.Serialization;
+using SW_SkyScanner_WebService.Services.Airports;
+using SW_SkyScanner_WebService.Services.Airports.Model;
 
 namespace SW_SkyScanner_WebService
 {
@@ -29,6 +29,17 @@ namespace SW_SkyScanner_WebService
             Security.UserName != null && Security.UserName.Equals("WS-Security"))
                 return "Authenticate User " + Security.UserName;
             return "Invalid User!!";
+        }
+
+        [WebMethod]
+        public string GetAirportExample(string icao24Code)
+        {
+            AirportWS airportWs = new AirportWS();
+            Airport airport = airportWs.GetAirport(icao24Code).GetAwaiter().GetResult();
+            if (airport == null)
+                return "No airports found!";
+            
+            return airport.Location.Latitude + " - " + airport.Location.Longitude;
         }
     }
 
