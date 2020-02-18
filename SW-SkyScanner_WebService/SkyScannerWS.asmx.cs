@@ -12,6 +12,7 @@ using SW_SkyScanner_WebService.Services.Planes.Model;
 using SW_SkyScanner_WebService.Services.Users;
 using SW_SkyScanner_WebService.Services.Users.Model;
 using SW_SkyScanner_WebService.Services.Weather;
+using SW_SkyScanner_WebService.Services.Weather.Model;
 
 namespace SW_SkyScanner_WebService
 {
@@ -42,17 +43,17 @@ namespace SW_SkyScanner_WebService
             return "Invalid User!!";
         }*/
 
-        [WebMethod]
+/*        [WebMethod]
         public User Register(string username, string password, string airportCode)
         {
             throw new NotImplementedException();
-        }
+        }*/
 
-        [WebMethod]
+/*        [WebMethod]
         public User Login(string username, string password)
         {
             throw new NotImplementedException();
-        }
+        }*/
         
         [WebMethod]
         public bool EditProfile(string username, string password, string airportCode)
@@ -98,6 +99,15 @@ namespace SW_SkyScanner_WebService
                 return "No airports found!";
             
             return airport.Location.Latitude + " - " + airport.Location.Longitude;
+        }
+        
+        [WebMethod]
+        public string GetWeatherExample(double latitude, double longitude)
+        {
+            Coordinate coordinate = new Coordinate(latitude, longitude);
+            Weather weather = _weatherWs.GetWeatherByCoordinate(coordinate).GetAwaiter().GetResult();
+
+            return weather.Description;
         }
         
         // Non Web Methods -- aux methods
