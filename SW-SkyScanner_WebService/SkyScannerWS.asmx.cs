@@ -131,6 +131,16 @@ namespace SW_SkyScanner_WebService
             return weather.Temperature.ToString(CultureInfo.InvariantCulture);
         }
         
+        [WebMethod]
+        public string GetPlanesByDepartureExample(string airportCode)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesByDeparture(airportCode).GetAwaiter().GetResult();
+            if (planes == null)
+                return "Could not retrieve the list of planes departing from " + airportCode;
+
+            return planes.Count.ToString();
+        }
+        
         // Non Web Methods -- aux methods
         
         public List<Plane> GetPlanesByLocation(Coordinate coordinate)

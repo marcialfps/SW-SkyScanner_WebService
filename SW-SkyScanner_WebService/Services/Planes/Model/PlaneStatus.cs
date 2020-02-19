@@ -4,8 +4,18 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
 {
     public class PlaneStatus
     {
-        
-//        Custom properties
+        public PlaneStatus()
+        {}
+        public PlaneStatus(dynamic dynStatus)
+        {
+            Icao24 = dynStatus[0];
+            LastUpdate = (int)dynStatus[3];
+            Location = new Coordinate((double)dynStatus[6], (double)dynStatus[5]);
+            Altitude = (double)dynStatus[13];
+            Speed = (double)dynStatus[9];
+            OnGround = (bool)dynStatus[8];
+            VerticalRate = (double)dynStatus[11];
+        }
 
         /// <summary>
         /// Flight code

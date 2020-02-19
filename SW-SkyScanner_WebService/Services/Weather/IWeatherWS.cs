@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using SW_SkyScanner_WebService.Services.Airports.Model;
-using SW_SkyScanner_WebService.Services.Weather.Model;
 
 
 namespace SW_SkyScanner_WebService.Services.Weather

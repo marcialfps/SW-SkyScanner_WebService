@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using SW_SkyScanner_WebService.Services.Airports;
 using SW_SkyScanner_WebService.Services.Airports.Model;
@@ -34,7 +33,7 @@ namespace SW_SkyScanner_WebService.Services.Weather
         // Add "&units=metric" to API call to get Celsius temperature.
         public Task<Model.Weather> GetWeatherByAirport(Airport airport)
         {
-            return GetWeatherByAirport(airport.Code);
+            return airport.Code == null ? null : GetWeatherByAirport(airport.Code);
         }
 
         public async Task<Model.Weather> GetWeatherByAirport(string airport)
@@ -50,7 +49,7 @@ namespace SW_SkyScanner_WebService.Services.Weather
 
         public Task<Model.Weather> GetForecastByAirport(Airport airport, int time)
         {
-            return GetForecastByAirport(airport.Code, time);
+            return airport.Code == null ? null : GetForecastByAirport(airport.Code, time);
         }
 
         public async Task<Model.Weather> GetForecastByAirport(string airport, int time)

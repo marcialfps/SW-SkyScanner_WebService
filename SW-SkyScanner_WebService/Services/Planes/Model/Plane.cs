@@ -4,7 +4,20 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
 {
     public class Plane
     {
-        
+        public Plane()
+        {}
+
+        public Plane(dynamic dynPlane)
+        {
+            Icao24 = dynPlane.icao24;
+            DepartureAirportCode = dynPlane.estDepartureAirport;
+            ArrivalAirportCode = dynPlane.estArrivalAirport;
+            DepartureTime = (int) dynPlane.firstSeen;
+            ArrivalTime = (int) dynPlane.lastSeen;
+            DepartureDistance = (int)dynPlane.estDepartureAirportHorizDistance;
+            ArrivalDistance = (int)dynPlane.estArrivalAirportHorizDistance;
+        }
+
         /// <summary>
         /// Status of the plane: coordinates, altitude, etc.
         /// </summary>
@@ -16,14 +29,24 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
         public string Icao24 { get; set; }
         
         /// <summary>
-        /// Departure airport code
+        /// Departure airport
         /// </summary>
         public Airport DepartureAirport { get; set; }
+        
+        /// <summary>
+        /// Departure airport code
+        /// </summary>
+        public string DepartureAirportCode { get; set; }
 
+        /// <summary>
+        /// Arrival airport
+        /// </summary>
+        public Airport ArrivalAirport { get; set; }
+        
         /// <summary>
         /// Arrival airport code
         /// </summary>
-        public Airport ArrivalAirport { get; set; }
+        public string ArrivalAirportCode { get; set; }
         
         /// <summary>
         /// Weather conditions on the plane location
