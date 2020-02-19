@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Web;
 using System.Web.Services;
 using SW_SkyScanner_WebService.Services.Airports;
@@ -11,6 +9,7 @@ using SW_SkyScanner_WebService.Services.Airports.Model;
 using SW_SkyScanner_WebService.Services.Planes;
 using SW_SkyScanner_WebService.Services.Planes.Model;
 using SW_SkyScanner_WebService.Services.Users;
+using SW_SkyScanner_WebService.Services.Users.Model;
 using SW_SkyScanner_WebService.Services.Weather;
 using SW_SkyScanner_WebService.Services.Weather.Model;
 
@@ -54,43 +53,36 @@ namespace SW_SkyScanner_WebService
         {
             throw new NotImplementedException();
         }*/
-        
+
         [WebMethod]
-        public bool EditProfile(string username, string password, string airportCode)
+        public User AddUser(string username, string password, string airportCode)
         {
             throw new NotImplementedException();
         }
         
         [WebMethod]
-        public bool DeleteAccount(string username)
+        public User GetUser(string username)
         {
             throw new NotImplementedException();
         }
         
         [WebMethod]
-        public List<Plane> GetPlanesByDepartureAirport(string airportCode)
+        public User EditUser(string username, string password, string airportCode)
         {
             throw new NotImplementedException();
         }
         
         [WebMethod]
-        public List<Plane> GetPlanesByArrivalAirport(string airportCode)
+        public User DeleteUser(string username)
         {
             throw new NotImplementedException();
         }
-        
+
         [WebMethod]
-        public List<Plane> GetPlanesCloseToAirport(string airportCode)
-        {
-            throw new NotImplementedException();
-        }
-        
-        
-        [WebMethod]
-        public Airport GetAirport_Example(string icao24Code)
+        public Airport GetAirportByCode(string airportCode)
         {
             AirportWS airportWs = new AirportWS();
-            Airport airport = airportWs.GetAirport(icao24Code).GetAwaiter().GetResult();
+            Airport airport = airportWs.GetAirport(airportCode).GetAwaiter().GetResult();
             if (airport == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -102,7 +94,7 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public Weather GetWeather_Example(double latitude, double longitude)
+        public Weather GetWeatherByCoordinate(double latitude, double longitude)
         {
             Coordinate coordinate = new Coordinate(latitude, longitude);
             Weather weather = _weatherWs.GetWeatherByCoordinate(coordinate).GetAwaiter().GetResult();
@@ -116,7 +108,7 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public Weather GetWeatherAirport_Example(string airportCode)
+        public Weather GetWeatherByAirport(string airportCode)
         {
             Weather weather = _weatherWs.GetWeatherByAirport(airportCode).GetAwaiter().GetResult();
             if (weather == null)
@@ -130,7 +122,7 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public Weather GetForecastAirport_Example(string airportCode, int time)
+        public Weather GetWeatherForecastByAirport(string airportCode, int time)
         {
             Weather weather = _weatherWs.GetForecastByAirport(airportCode, time).GetAwaiter().GetResult();
             if (weather == null)
@@ -144,9 +136,23 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public List<Plane> GetPlanesByDeparture_Example(string airportCode)
+        public PlaneStatus GetPlaneStatusByCode(string planeCode)
         {
-            IList<Plane> planes = _planeWs.GetPlanesByDeparture(airportCode).GetAwaiter().GetResult();
+            PlaneStatus status = _planeWs.GetPlaneStatus(planeCode).GetAwaiter().GetResult();
+            if (status == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return status;
+        }
+        
+        [WebMethod]
+        public List<Plane> GetPlanesByDeparture(string departureAirportCode)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesByDeparture(departureAirportCode).GetAwaiter().GetResult();
             if (planes == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -158,9 +164,9 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public List<Plane> GetPlanesByDepartureDetail_Example(string airportCode, bool getStatusAndWeather)
+        public List<Plane> GetPlanesByDepartureDetail(string departureAirportCode, bool getStatusAndWeather)
         {
-            IList<Plane> planes = _planeWs.GetPlanesByDepartureDetail(airportCode, getStatusAndWeather).GetAwaiter().GetResult();
+            IList<Plane> planes = _planeWs.GetPlanesByDepartureDetail(departureAirportCode, getStatusAndWeather).GetAwaiter().GetResult();
             if (planes == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -172,9 +178,9 @@ namespace SW_SkyScanner_WebService
         }
         
         [WebMethod]
-        public List<Plane> GetPlanesByArrival_Example(string airportCode)
+        public List<Plane> GetPlanesByArrival(string arrivalAirportCode)
         {
-            IList<Plane> planes = _planeWs.GetPlanesByArrival(airportCode).GetAwaiter().GetResult();
+            IList<Plane> planes = _planeWs.GetPlanesByArrival(arrivalAirportCode).GetAwaiter().GetResult();
             if (planes == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -187,9 +193,9 @@ namespace SW_SkyScanner_WebService
         
         
         [WebMethod]
-        public List<Plane> GetPlanesByArrivalDetail_Example(string airportCode, bool getStatusAndWeather)
+        public List<Plane> GetPlanesByArrivalDetail(string arrivalAirportCode, bool getStatusAndWeather)
         {
-            IList<Plane> planes = _planeWs.GetPlanesByArrivalDetail(airportCode, getStatusAndWeather).GetAwaiter().GetResult();
+            IList<Plane> planes = _planeWs.GetPlanesByArrivalDetail(arrivalAirportCode, getStatusAndWeather).GetAwaiter().GetResult();
             if (planes == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -202,7 +208,7 @@ namespace SW_SkyScanner_WebService
         
         
         [WebMethod]
-        public List<Plane> GetPlanesCloseToAirport_Example(string airportCode)
+        public List<Plane> GetPlanesCloseToAirport(string airportCode)
         {
             IList<Plane> planes = _planeWs.GetPlanesCloseToAirport(airportCode).GetAwaiter().GetResult();
             if (planes == null)
@@ -213,13 +219,6 @@ namespace SW_SkyScanner_WebService
 
             HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
             return planes.ToList();
-        }
-        
-        // Non Web Methods -- aux methods
-        
-        public List<Plane> GetPlanesByLocation(Coordinate coordinate)
-        {
-            throw new NotImplementedException();
         }
     }
 

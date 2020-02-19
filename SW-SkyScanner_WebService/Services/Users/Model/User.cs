@@ -4,6 +4,9 @@ namespace SW_SkyScanner_WebService.Services.Users.Model
 {
     public class User : ICloneable
     {
+        public User()
+        {}
+
         public User(int id, string name, string password, string airport)
         {
             Id = id;
