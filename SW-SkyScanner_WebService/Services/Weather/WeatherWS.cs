@@ -13,7 +13,8 @@ namespace SW_SkyScanner_WebService.Services.Weather
     public class WeatherWS : IWeatherWS
     {
         private HttpClient _client;
-        private string _apiBaseUrl;
+        private string _apiBaseUrlWeather;
+        private string _apiBaseUrlForecast;
         
         private IAirportWS _airportWs;
 
@@ -21,7 +22,10 @@ namespace SW_SkyScanner_WebService.Services.Weather
         {
             // Client and weather API config
             _client = new HttpClient();
-            _apiBaseUrl = "http://api.openweathermap.org/data/2.5/weather?appid=6764c33ce3b420a1f6963c61fc2a371c";
+            _apiBaseUrlWeather = 
+                "http://api.openweathermap.org/data/2.5/weather?appid=6764c33ce3b420a1f6963c61fc2a371c&units=metric";
+            _apiBaseUrlForecast = 
+                "http://api.openweathermap.org/data/2.5/forecast?appid=6764c33ce3b420a1f6963c61fc2a371c&units=metric";
             
             // Airport service
             _airportWs = new AirportWS();
@@ -33,14 +37,15 @@ namespace SW_SkyScanner_WebService.Services.Weather
             return GetWeatherByAirport(airport.Code);
         }
 
-        public Task<Model.Weather> GetWeatherByAirport(string airport)
+        public async Task<Model.Weather> GetWeatherByAirport(string airport)
         {
             // 1. Get airport coordinates
-            
+            Coordinate coordinate = await _airportWs.GetAirportCoordinates(airport);
+            if (coordinate == null)
+                return null;
             // 2. Request current weather in obtained coordinates
-            
-            // 3. Parse API response into weather object
-            throw new NotImplementedException();
+            Model.Weather weather = await GetWeatherByCoordinate(coordinate);
+            return weather;
         }
 
         public Task<Model.Weather> GetForecastByAirport(Airport airport, int time)
@@ -48,42 +53,61 @@ namespace SW_SkyScanner_WebService.Services.Weather
             return GetForecastByAirport(airport.Code, time);
         }
 
-        public Task<Model.Weather> GetForecastByAirport(string airport, int time)
+        public async Task<Model.Weather> GetForecastByAirport(string airport, int time)
         {
             // 1. Get airport coordinates
+            Coordinate coordinate = await _airportWs.GetAirportCoordinates(airport);
+            if (coordinate == null)
+                return null;
             
             // 2. Request weather forecast in obtained coordinates
-            
-            // 3. For all the data returned, pik up the one whose "dt" is closer to the requested time
-            
-            // 3. Parse data into weather object
-            throw new NotImplementedException();
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlForecast}&lat={coordinate.Latitude}&" +
+                                                            $"lon={coordinate.Longitude}").GetAwaiter().GetResult();
+
+            // 3. Arrange all the weather predictions into a list of weather objects
+            IList<Model.Weather> weathers = new List<Model.Weather>();
+            if (response.IsSuccessStatusCode)
+            {
+                weathers = new List<Model.Weather>();
+                dynamic dynWeathers = JObject.Parse(await response.Content.ReadAsStringAsync());
+                try
+                {
+                    foreach (dynamic predictedWeather in dynWeathers.list)
+                    {
+                        weathers.Add(new Model.Weather(predictedWeather));
+                    }
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+            // 3. For all the weather objects stored, return the prediction whose time is closer to the requested time
+            if (weathers.Count > 0)
+                return weathers.OrderBy(w => Math.Abs(w.Time - time)).First();
+
+            return null;
         }
 
         public async Task<Model.Weather> GetWeatherByCoordinate(Coordinate coordinate)
         {
             Model.Weather weather = null;
             // 1. Call API on given latitude and longitude
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}&lat={coordinate.Latitude}&" +
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlWeather}&lat={coordinate.Latitude}&" +
                                                             $"lon={coordinate.Longitude}").GetAwaiter().GetResult();
             
             // 2. Parse API response to Weather object if API response was OK
             if (response.IsSuccessStatusCode)
             {
-                weather = new Model.Weather();
                 dynamic dynWeather = JObject.Parse(await response.Content.ReadAsStringAsync());
-                
-                // Fill weather object properties
-                weather.Main = dynWeather.weather[0].main;
-                weather.Description = dynWeather.weather[0].description;
-                weather.Temperature = (double)dynWeather.main.temp;
-                weather.TemperatureMax = (double)dynWeather.main.temp_max;
-                weather.TemperatureMin = (double)dynWeather.main.temp_min;
-                weather.Pressure = (int)dynWeather.main.pressure;
-                weather.Humidity = (int)dynWeather.main.humidity;
-                weather.WindSpeed = (double)dynWeather.wind.speed;
-                weather.WindDirection = (double)dynWeather.wind.speed;
-                weather.Cloudiness = (int)dynWeather.clouds.all;
+                try
+                {
+                    weather = new Model.Weather(dynWeather);
+                }
+                catch (Exception)
+                {
+                    weather = null;
+                }
             }
             return weather;
         }

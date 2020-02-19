@@ -30,22 +30,20 @@ namespace SW_SkyScanner_WebService.Services.Airports
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}?icao={code}").GetAwaiter().GetResult();
             if (response.IsSuccessStatusCode)
             {
-                
                 // Build dynamic object from JSON response
                 dynamic dynAirport = JObject.Parse(await response.Content.ReadAsStringAsync());
                 // Check the response was not and error
                 if (dynAirport.error == null)
                 {
                     // Construct Airport object from JSON response
-                    airport = new Airport();
-                
-                    airport.Code = dynAirport.icao;
-                    airport.Name = dynAirport.name;
-                    airport.City = dynAirport.city;
-                    airport.Country = dynAirport.country;
-                    airport.Phone = dynAirport.phone;
-                    airport.PostalCode = dynAirport.postal_code;
-                    airport.Location = new Coordinate((double)dynAirport.latitude, (double)dynAirport.longitude);
+                    try
+                    {
+                        airport = new Airport(dynAirport);
+                    }
+                    catch (Exception)
+                    {
+                        airport = null;
+                    }
                 }
             }
             return airport;
@@ -53,17 +51,12 @@ namespace SW_SkyScanner_WebService.Services.Airports
 
         public async Task<Coordinate> GetAirportCoordinates(string code)
         {
-            Coordinate coordinate = null;
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}?icao={code}").GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-            {
-                // Build dynamic object from JSON response
-                dynamic dynAirport = JObject.Parse(await response.Content.ReadAsStringAsync());
-                
-                // Construct Coordinate object from JSON response
-                coordinate = new Coordinate(dynAirport.latitude, dynAirport.longitude);
-            }
-            return coordinate;
+            Airport airport = await GetAirport(code);
+            
+            if (airport == null)
+                return null;
+            
+            return airport.Location;
         }
     }
 }

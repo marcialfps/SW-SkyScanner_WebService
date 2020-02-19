@@ -2,6 +2,20 @@ namespace SW_SkyScanner_WebService.Services.Airports.Model
 {
     public class Airport
     {
+        public Airport()
+        {}
+
+        public Airport(dynamic dynAirport)
+        {
+            Code = dynAirport.icao;
+            Name = dynAirport.name;
+            City = dynAirport.city;
+            Country = dynAirport.country;
+            Phone = dynAirport.phone;
+            PostalCode = dynAirport.postal_code;
+            Location = new Coordinate((double) dynAirport.latitude, (double) dynAirport.longitude);
+        }
+
         /// <summary>
         /// Airport icao code
         /// </summary>

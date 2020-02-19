@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web.Services;
@@ -106,8 +107,28 @@ namespace SW_SkyScanner_WebService
         {
             Coordinate coordinate = new Coordinate(latitude, longitude);
             Weather weather = _weatherWs.GetWeatherByCoordinate(coordinate).GetAwaiter().GetResult();
-
+            if (weather == null)
+                return "Could not retrieve weather";
             return weather.Description;
+        }
+        
+        [WebMethod]
+        public string GetWeatherAirportExample(string airportCode)
+        {
+            Weather weather = _weatherWs.GetWeatherByAirport(airportCode).GetAwaiter().GetResult();
+            if (weather == null)
+                return "Could not retrieve weather";
+            return weather.Humidity.ToString();
+        }
+        
+        [WebMethod]
+        public string GetForecastAirportExample(string airportCode)
+        {
+            Weather weather = _weatherWs.GetForecastByAirport(airportCode, 0).GetAwaiter().GetResult();
+            if (weather == null)
+                return "Could not retrieve weather";
+            
+            return weather.Temperature.ToString(CultureInfo.InvariantCulture);
         }
         
         // Non Web Methods -- aux methods
