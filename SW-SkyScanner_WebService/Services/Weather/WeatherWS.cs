@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -60,8 +61,8 @@ namespace SW_SkyScanner_WebService.Services.Weather
                 return null;
             
             // 2. Request weather forecast in obtained coordinates
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlForecast}&lat={coordinate.Latitude}&" +
-                                                            $"lon={coordinate.Longitude}").GetAwaiter().GetResult();
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlForecast}&lat={(coordinate.Latitude).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lon={(coordinate.Longitude).ToString(CultureInfo.InvariantCulture)}").GetAwaiter().GetResult();
 
             // 3. Arrange all the weather predictions into a list of weather objects
             IList<Model.Weather> weathers = new List<Model.Weather>();
@@ -92,8 +93,8 @@ namespace SW_SkyScanner_WebService.Services.Weather
         {
             Model.Weather weather = null;
             // 1. Call API on given latitude and longitude
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlWeather}&lat={coordinate.Latitude}&" +
-                                                            $"lon={coordinate.Longitude}").GetAwaiter().GetResult();
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlWeather}&lat={(coordinate.Latitude).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lon={(coordinate.Longitude).ToString(CultureInfo.InvariantCulture)}").GetAwaiter().GetResult();
             
             // 2. Parse API response to Weather object if API response was OK
             if (response.IsSuccessStatusCode)

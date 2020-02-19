@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -335,10 +336,10 @@ namespace SW_SkyScanner_WebService.Services.Planes
             
             // - Plane states
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlStatus}?" +
-                                                            $"lamin={coordinate.Latitude - CoordinatesThreshold}&" +
-                                                            $"lamax={coordinate.Latitude + CoordinatesThreshold}&" +
-                                                            $"lomin={coordinate.Longitude - CoordinatesThreshold}&" +
-                                                            $"lomax={coordinate.Latitude + CoordinatesThreshold}")
+                                                            $"lamin={(coordinate.Latitude - CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lamax={(coordinate.Latitude + CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lomin={(coordinate.Longitude - CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lomax={(coordinate.Latitude + CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}")
                 .GetAwaiter().GetResult();
             
             IList<Plane> planes = new List<Plane>();
