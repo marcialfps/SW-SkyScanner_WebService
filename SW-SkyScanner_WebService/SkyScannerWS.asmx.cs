@@ -79,6 +79,13 @@ namespace SW_SkyScanner_WebService
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Contacts the "Airport info" API (https://rapidapi.com/Active-api/api/airport-info/details) and retrieves
+        /// the data of an airport
+        /// </summary>
+        /// <param name="airportCode">ICAO24 code of the desired airport</param>
+        /// <returns>A serialized Airport object (<see cref="Airport"/>) if an airport was found (code 202)
+        /// or null if no airport was found (code 404)</returns>
         [WebMethod]
         public Airport GetAirportByCode(string airportCode)
         {
@@ -93,6 +100,10 @@ namespace SW_SkyScanner_WebService
             return airport;
         }
         
+        /// <summary>
+        /// Contacts the "Airport info" API (https://rapidapi.com/Active-api/api/airport-info/details) and retrieves
+        /// the coordinates of an airport. Works in a similar way than <see cref="GetAirportByCode"/>
+        /// </summary>
         [WebMethod]
         public Coordinate GetAirportCoordinatesByCode(string airportCode)
         {
@@ -107,6 +118,14 @@ namespace SW_SkyScanner_WebService
             return airportCoordinate;
         }
         
+        /// <summary>
+        /// Contacts the "OpenWeatherMap" API (https://openweathermap.org/api) and retrieves
+        /// the current weather in the given coordinate
+        /// </summary>
+        /// <param name="latitude">Latitude of the coordinate</param>
+        /// <param name="longitude">Longitude of the coordinate</param>
+        /// <returns>A serialized Weather object (<see cref="Weather"/>) if the weather was found (code 202)
+        /// or null if the coordinates were wrong or the weather was not found (code 404)</returns>
         [WebMethod]
         public Weather GetWeatherByCoordinate(double latitude, double longitude)
         {
@@ -121,6 +140,10 @@ namespace SW_SkyScanner_WebService
             return weather;
         }
         
+        /// <summary>
+        /// Contacts the "OpenWeatherMap" API (https://openweathermap.org/api) and retrieves
+        /// the current weather in the given airport. Works in a similar way than <see cref="GetWeatherByCoordinate"/>
+        /// </summary>
         [WebMethod]
         public Weather GetWeatherByAirport(string airportCode)
         {
@@ -135,6 +158,14 @@ namespace SW_SkyScanner_WebService
             return weather;
         }
         
+        /// <summary>
+        /// Contacts the "OpenWeatherMap" API (https://openweathermap.org/api) and retrieves
+        /// the predicted weather for the given airport and moment in time
+        /// </summary>
+        /// <param name="airportCode">Airport for which the weather is requested</param>
+        /// <param name="time">UNIX timestamp for which the weather is requested</param>
+        /// <returns>A serialized Weather object (<see cref="Weather"/>) if the weather was found (code 202)
+        /// or null if the coordinates were wrong or the weather was not found (code 404)</returns>
         [WebMethod]
         public Weather GetWeatherForecastByAirport(string airportCode, int time)
         {
@@ -149,6 +180,13 @@ namespace SW_SkyScanner_WebService
             return weather;
         }
         
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the current status of a plane
+        /// </summary>
+        /// <param name="planeCode">ICAO24 code of the desired plane</param>
+        /// <returns>A serialized PlaneStatus object (<see cref="PlaneStatus"/>) if the status was found (code 202)
+        /// or null if no status was found (code 404)</returns>
         [WebMethod]
         public PlaneStatus GetPlaneStatusByCode(string planeCode)
         {
@@ -163,6 +201,14 @@ namespace SW_SkyScanner_WebService
             return status;
         }
         
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the planes that departed from the given airport in the last 24 hours. The planes returned contain minimal
+        /// information (no status, no weather condition and only the codes of their related airport)
+        /// </summary>
+        /// <param name="departureAirportCode">ICAO24 code of the departure airport</param>
+        /// <returns>A serialized list of Plane objects (<see cref="Plane"/>) if any plane was found (code 202)
+        /// or null if no plane was found (code 404)</returns>
         [WebMethod]
         public List<Plane> GetPlanesByDeparture(string departureAirportCode)
         {
@@ -176,7 +222,18 @@ namespace SW_SkyScanner_WebService
             HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
             return planes.ToList();
         }
-        
+
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the planes that departed from the given airport in the last 24 hours. The planes returned contain all the
+        /// details of their departure and arrival airports. This is a VERY SLOW method.
+        /// </summary>
+        /// <param name="departureAirportCode">ICAO24 code of the departure airport</param>
+        /// <param name="getStatusAndWeather">True if the returned planes should also contain their current status
+        /// and the weather conditions on the plane location and on the related airports.
+        /// </param>
+        /// <returns>A serialized list of Plane objects (<see cref="Plane"/>) if any plane was found (code 202)
+        /// or null if no plane was found (code 404)</returns>
         [WebMethod]
         public List<Plane> GetPlanesByDepartureDetail(string departureAirportCode, bool getStatusAndWeather)
         {
@@ -191,6 +248,15 @@ namespace SW_SkyScanner_WebService
             return planes.ToList();
         }
         
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the planes that were active in the last 24 hours that arrive in the given airport.
+        /// The planes returned contain minimal information (no status, no weather condition and
+        /// only the codes of their related airport)
+        /// </summary>
+        /// <param name="arrivalAirportCode">ICAO24 code of the arrival airport</param>
+        /// <returns>A serialized list of Plane objects (<see cref="Plane"/>) if any plane was found (code 202)
+        /// or null if no plane was found (code 404)</returns>
         [WebMethod]
         public List<Plane> GetPlanesByArrival(string arrivalAirportCode)
         {
@@ -205,7 +271,18 @@ namespace SW_SkyScanner_WebService
             return planes.ToList();
         }
         
-        
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the planes that were active in the last 24 hours that arrive in the given airport.
+        /// The planes returned contain all the details of their departure and arrival airports.
+        /// This is a VERY SLOW method.
+        /// </summary>
+        /// <param name="arrivalAirportCode">ICAO24 code of the arrival airport</param>
+        /// <param name="getStatusAndWeather">True if the returned planes should also contain their current status
+        /// and the weather conditions on the plane location and on the related airports.
+        /// </param>
+        /// <returns>A serialized list of Plane objects (<see cref="Plane"/>) if any plane was found (code 202)
+        /// or null if no plane was found (code 404)</returns>
         [WebMethod]
         public List<Plane> GetPlanesByArrivalDetail(string arrivalAirportCode, bool getStatusAndWeather)
         {
@@ -220,7 +297,14 @@ namespace SW_SkyScanner_WebService
             return planes.ToList();
         }
         
-        
+        /// <summary>
+        /// Contacts the "OpenSky" API (https://opensky-network.org/apidoc/rest.html#) and retrieves
+        /// the planes that are active and close to the given airport. The planes returned only have their
+        /// status available.
+        /// </summary>
+        /// <param name="airportCode">ICAO24 code of the airport</param>
+        /// <returns>A serialized list of Plane objects (<see cref="Plane"/>) if any plane was found (code 202)
+        /// or null if no plane was found (code 404)</returns>
         [WebMethod]
         public List<Plane> GetPlanesCloseToAirport(string airportCode)
         {
