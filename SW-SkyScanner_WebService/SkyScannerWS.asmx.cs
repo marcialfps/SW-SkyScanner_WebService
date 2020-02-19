@@ -16,7 +16,8 @@ using SW_SkyScanner_WebService.Services.Weather.Model;
 namespace SW_SkyScanner_WebService
 {
     /// <summary>
-    /// Descripción breve de SkyScannerWS
+    /// SkyScannerWS offers functionality to track planes and get planes and airports information (including
+    /// coordinates, weather, etc.)
     /// </summary>
     [WebService(Namespace = "http://ws.skyscanner/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -81,8 +82,7 @@ namespace SW_SkyScanner_WebService
         [WebMethod]
         public Airport GetAirportByCode(string airportCode)
         {
-            AirportWS airportWs = new AirportWS();
-            Airport airport = airportWs.GetAirport(airportCode).GetAwaiter().GetResult();
+            Airport airport = _airportWs.GetAirport(airportCode).GetAwaiter().GetResult();
             if (airport == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
@@ -91,6 +91,20 @@ namespace SW_SkyScanner_WebService
             
             HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
             return airport;
+        }
+        
+        [WebMethod]
+        public Coordinate GetAirportCoordinatesByCode(string airportCode)
+        {
+            Coordinate airportCoordinate = _airportWs.GetAirportCoordinates(airportCode).GetAwaiter().GetResult();
+            if (airportCoordinate == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return airportCoordinate;
         }
         
         [WebMethod]
