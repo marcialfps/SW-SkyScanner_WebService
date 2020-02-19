@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Web;
 using System.Web.Services;
-using System.Web.Services.Protocols;
-using System.Xml.Serialization;
 using SW_SkyScanner_WebService.Services.Airports;
 using SW_SkyScanner_WebService.Services.Airports.Model;
 using SW_SkyScanner_WebService.Services.Planes;
 using SW_SkyScanner_WebService.Services.Planes.Model;
 using SW_SkyScanner_WebService.Services.Users;
-using SW_SkyScanner_WebService.Services.Users.Model;
 using SW_SkyScanner_WebService.Services.Weather;
 using SW_SkyScanner_WebService.Services.Weather.Model;
 
@@ -83,62 +82,137 @@ namespace SW_SkyScanner_WebService
         [WebMethod]
         public List<Plane> GetPlanesCloseToAirport(string airportCode)
         {
-            Airport airport = _airportWs.GetAirport(airportCode).GetAwaiter().GetResult();
-            if (airport == null)
-                return null;
-            return GetPlanesByLocation(airport.Location);
+            throw new NotImplementedException();
         }
         
         
-
         [WebMethod]
-        public string GetAirportExample(string icao24Code)
+        public Airport GetAirport_Example(string icao24Code)
         {
             AirportWS airportWs = new AirportWS();
             Airport airport = airportWs.GetAirport(icao24Code).GetAwaiter().GetResult();
             if (airport == null)
-                return "No airports found!";
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
             
-            return airport.Location.Latitude + " - " + airport.Location.Longitude;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return airport;
         }
         
         [WebMethod]
-        public string GetWeatherExample(double latitude, double longitude)
+        public Weather GetWeather_Example(double latitude, double longitude)
         {
             Coordinate coordinate = new Coordinate(latitude, longitude);
             Weather weather = _weatherWs.GetWeatherByCoordinate(coordinate).GetAwaiter().GetResult();
             if (weather == null)
-                return "Could not retrieve weather";
-            return weather.Description;
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return weather;
         }
         
         [WebMethod]
-        public string GetWeatherAirportExample(string airportCode)
+        public Weather GetWeatherAirport_Example(string airportCode)
         {
             Weather weather = _weatherWs.GetWeatherByAirport(airportCode).GetAwaiter().GetResult();
             if (weather == null)
-                return "Could not retrieve weather";
-            return weather.Humidity.ToString();
-        }
-        
-        [WebMethod]
-        public string GetForecastAirportExample(string airportCode)
-        {
-            Weather weather = _weatherWs.GetForecastByAirport(airportCode, 0).GetAwaiter().GetResult();
-            if (weather == null)
-                return "Could not retrieve weather";
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
             
-            return weather.Temperature.ToString(CultureInfo.InvariantCulture);
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return weather;
         }
         
         [WebMethod]
-        public string GetPlanesByDepartureExample(string airportCode)
+        public Weather GetForecastAirport_Example(string airportCode, int time)
+        {
+            Weather weather = _weatherWs.GetForecastByAirport(airportCode, time).GetAwaiter().GetResult();
+            if (weather == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return weather;
+        }
+        
+        [WebMethod]
+        public List<Plane> GetPlanesByDeparture_Example(string airportCode)
         {
             IList<Plane> planes = _planeWs.GetPlanesByDeparture(airportCode).GetAwaiter().GetResult();
             if (planes == null)
-                return "Could not retrieve the list of planes departing from " + airportCode;
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return planes.ToList();
+        }
+        
+        [WebMethod]
+        public List<Plane> GetPlanesByDepartureDetail_Example(string airportCode, bool getStatusAndWeather)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesByDepartureDetail(airportCode, getStatusAndWeather).GetAwaiter().GetResult();
+            if (planes == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return planes.ToList();
+        }
+        
+        [WebMethod]
+        public List<Plane> GetPlanesByArrival_Example(string airportCode)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesByArrival(airportCode).GetAwaiter().GetResult();
+            if (planes == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
 
-            return planes.Count.ToString();
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return planes.ToList();
+        }
+        
+        
+        [WebMethod]
+        public List<Plane> GetPlanesByArrivalDetail_Example(string airportCode, bool getStatusAndWeather)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesByArrivalDetail(airportCode, getStatusAndWeather).GetAwaiter().GetResult();
+            if (planes == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return planes.ToList();
+        }
+        
+        
+        [WebMethod]
+        public List<Plane> GetPlanesCloseToAirport_Example(string airportCode)
+        {
+            IList<Plane> planes = _planeWs.GetPlanesCloseToAirport(airportCode).GetAwaiter().GetResult();
+            if (planes == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return planes.ToList();
         }
         
         // Non Web Methods -- aux methods

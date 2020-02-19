@@ -13,7 +13,8 @@ namespace SW_SkyScanner_WebService.Services.Airports.Model
             Country = dynAirport.country;
             Phone = dynAirport.phone;
             PostalCode = dynAirport.postal_code;
-            Location = new Coordinate((double) dynAirport.latitude, (double) dynAirport.longitude);
+            if (dynAirport.latitude != null && dynAirport.longitude != null)
+                Location = new Coordinate((double) dynAirport.latitude, (double) dynAirport.longitude);
         }
 
         /// <summary>
@@ -55,5 +56,12 @@ namespace SW_SkyScanner_WebService.Services.Airports.Model
         /// Airport weather condition
         /// </summary>
         public Weather.Model.Weather Weather { get; set; }
+
+        public override string ToString()
+        {
+            return $"Airport =>\n\t{nameof(Code)}: {Code}, {nameof(Name)}: {Name}, {nameof(City)}: {City}, " +
+                   $"{nameof(Country)}: {Country}, {nameof(Phone)}: {Phone}, {nameof(PostalCode)}: {PostalCode}, " +
+                   $"{nameof(Location)}: {Location}, {nameof(Weather)}: {Weather}";
+        }
     }
 }

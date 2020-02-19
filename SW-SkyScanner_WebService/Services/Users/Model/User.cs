@@ -15,7 +15,7 @@ namespace SW_SkyScanner_WebService.Services.Users.Model
         /// <summary>
         /// User numeric id
         /// </summary>
-        private int Id { get;}
+        private int Id { get; set; }
         
         /// <summary>
         /// User name

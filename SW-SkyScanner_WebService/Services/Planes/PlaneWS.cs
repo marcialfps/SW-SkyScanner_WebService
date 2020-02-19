@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -14,21 +15,26 @@ namespace SW_SkyScanner_WebService.Services.Planes
     {
         /// <summary>
         /// Limits the amount of hours in the past/future that we'll request plane data.
-        /// e.g.: a limit of 5 hours means we'll ask for planes arriving/departing from (current time - 5 hours)
+        /// e.g.: a limit of 5 hours means we'll ask for plane data arriving/departing from (current time - 5 hours)
         /// to (current time + 5 hours).
         /// </summary>
-        private const int HourDetectionLimit = 80;
+        private const int HourDetectionLimit = 24;
         
         /// <summary>
-        /// Limit the amount of planes we can retrieve at a time
+        /// Limit the amount of planes we can retrieve at a time when fetching detailed info
         /// </summary>
-        private const int PlanesLimit = 15;
+        private const int PlanesLimit = 5;
+        
+        /// <summary>
+        /// Limit the amount of planes we can retrieve at a time when not fetching detailed info
+        /// </summary>
+        private const int PlanesLimitStandard = 20;
         
         /// <summary>
         /// When searching for planes on a given coordinate, limit how far the planes can be from the coordinate
         /// to be compliant
         /// </summary>
-        private const int CoordinatesThreshold = 2;
+        private const int CoordinatesThreshold = 1;
 
         private HttpClient _client;
         private string _apiBaseUrlStatus;
@@ -93,17 +99,17 @@ namespace SW_SkyScanner_WebService.Services.Planes
             return status;
         }
 
-        public Task<IList<Plane>> GetPlanesByDeparture(Airport departureAirport)
+        public Task<IList<Plane>> GetPlanesByDeparture(Airport departureAirport, bool getStatus = false)
         {
-            return departureAirport.Code == null ? null : GetPlanesByDeparture(departureAirport.Code);
+            return departureAirport.Code == null ? null : GetPlanesByDeparture(departureAirport.Code, getStatus);
         }
 
-        public Task<IList<Plane>> GetPlanesByDepartureDetail(Airport departureAirport)
+        public Task<IList<Plane>> GetPlanesByDepartureDetail(Airport departureAirport, bool getStatusAndWeather = false)
         {
-            return departureAirport.Code == null ? null : GetPlanesByDepartureDetail(departureAirport.Code);
+            return departureAirport.Code == null ? null : GetPlanesByDepartureDetail(departureAirport.Code, getStatusAndWeather);
         }
 
-        public async Task<IList<Plane>> GetPlanesByDeparture(string departureAirport)
+        public async Task<IList<Plane>> GetPlanesByDeparture(string departureAirport, bool getStatus = false)
         {
             List<Plane> planes = new List<Plane>();
             
@@ -111,7 +117,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlDeparture}?airport={departureAirport}" +
                                                             $"&begin={currentTime - HourDetectionLimit * 3600}" +
-                                                            $"&end={currentTime + HourDetectionLimit * 3600}")
+                                                            $"&end={currentTime}")
                 .GetAwaiter().GetResult();
             
             // 2. Parse the JSON response into a list of Plane objects.
@@ -124,6 +130,8 @@ namespace SW_SkyScanner_WebService.Services.Planes
                     foreach (dynamic planeJson in dynPlanes)
                     {
                         Plane plane = new Plane(planeJson);
+                        if (getStatus)
+                            plane.Status = await GetPlaneStatus(plane.Icao24, plane.DepartureTime);
                         planes.Add(plane);
                     }
                     return planes;
@@ -136,7 +144,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
             return null;
         }
 
-        public async Task<IList<Plane>> GetPlanesByDepartureDetail(string departureAirport)
+        public async Task<IList<Plane>> GetPlanesByDepartureDetail(string departureAirport, bool getStatusAndWeather = false)
         {
             List<Plane> planes = new List<Plane>();
             
@@ -144,13 +152,14 @@ namespace SW_SkyScanner_WebService.Services.Planes
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlDeparture}?airport={departureAirport}" +
                                                             $"&begin={currentTime - HourDetectionLimit * 3600}" +
-                                                            $"&end={currentTime + HourDetectionLimit * 3600}")
+                                                            $"&end={currentTime}")
                 .GetAwaiter().GetResult();
             
             // 2. Parse the JSON response into a list of Plane objects.
             if (response.IsSuccessStatusCode)
             {
                 dynamic dynPlanes = JArray.Parse(await response.Content.ReadAsStringAsync());
+                int limit = 0;
                 try
                 {
                     /* Create the plane object AND also:
@@ -161,21 +170,37 @@ namespace SW_SkyScanner_WebService.Services.Planes
                      */
                     foreach (dynamic planeJson in dynPlanes)
                     {
-                        // Limit how many planes we track
-                        if (planes.Count >= PlanesLimit)
+                        // Limit how many planes we track 
+                        if (!getStatusAndWeather && limit >= PlanesLimitStandard || getStatusAndWeather && limit >= PlanesLimit)
                             break;
                         
                         Plane plane = new Plane(planeJson);
-                        plane.Status = await GetPlaneStatus(plane.Icao24);
                         plane.DepartureAirport = await _airportWs.GetAirport(plane.DepartureAirportCode);
                         plane.ArrivalAirport = await _airportWs.GetAirport(plane.ArrivalAirportCode);
-                        if (plane.Status != null)
-                            plane.Weather = await _weatherWs.GetWeatherByCoordinate(plane.Status.Location);
+                        if (getStatusAndWeather)
+                        {
+                            plane.Status = await GetPlaneStatus(plane.Icao24);
+                            if (plane.Status != null && plane.Status.Location != null)
+                            { 
+                                plane.Weather = await _weatherWs.GetWeatherByCoordinate(plane.Status.Location);
+                            }
+                            
+                            if (plane.DepartureAirport != null)
+                                plane.DepartureAirport.Weather =
+                                    await _weatherWs.GetWeatherByCoordinate(plane.DepartureAirport.Location);
+                            
+                            if (plane.ArrivalAirport != null)
+                                plane.ArrivalAirport.Weather =
+                                    await _weatherWs.GetWeatherByCoordinate(plane.ArrivalAirport.Location);
+                        }
 
-                        planes.Add(plane);
+                        if (!getStatusAndWeather || plane.Status != null)
+                        {
+                            planes.Add(plane);
+                            limit++;
+                        }
                     }
-
-                    return planes;
+                    return planes.OrderBy(p => p.DepartureTime).ToList();
                 }
                 catch (Exception)
                 {
@@ -185,17 +210,17 @@ namespace SW_SkyScanner_WebService.Services.Planes
             return null;
         }
 
-        public Task<IList<Plane>> GetPlanesByArrival(Airport arrivalAirport)
+        public Task<IList<Plane>> GetPlanesByArrival(Airport arrivalAirport, bool getStatus = false)
         {
-            return arrivalAirport.Code == null ? null : GetPlanesByArrival(arrivalAirport.Code);
+            return arrivalAirport.Code == null ? null : GetPlanesByArrival(arrivalAirport.Code, getStatus);
         }
 
-        public Task<IList<Plane>> GetPlanesByArrivalDetail(Airport arrivalAirport)
+        public Task<IList<Plane>> GetPlanesByArrivalDetail(Airport arrivalAirport, bool getStatusAndWeather = false)
         {
-            return arrivalAirport.Code == null ? null : GetPlanesByArrivalDetail(arrivalAirport.Code);
+            return arrivalAirport.Code == null ? null : GetPlanesByArrivalDetail(arrivalAirport.Code, getStatusAndWeather);
         }
 
-        public async Task<IList<Plane>> GetPlanesByArrival(string arrivalAirport)
+        public async Task<IList<Plane>> GetPlanesByArrival(string arrivalAirport,bool getStatus = false)
         {
             IList<Plane> planes = new List<Plane>();
             
@@ -203,7 +228,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlArrival}?airport={arrivalAirport}" +
                                                             $"&begin={currentTime - HourDetectionLimit * 3600}" +
-                                                            $"&end={currentTime + HourDetectionLimit * 3600}")
+                                                            $"&end={currentTime}")
                 .GetAwaiter().GetResult();
             
             // 2. Parse the JSON response into a list of Plane objects.
@@ -216,6 +241,8 @@ namespace SW_SkyScanner_WebService.Services.Planes
                     foreach (dynamic planeJson in dynPlanes)
                     {
                         Plane plane = new Plane(planeJson);
+                        if (getStatus)
+                            plane.Status = await GetPlaneStatus(plane.Icao24, plane.DepartureTime);
                         planes.Add(plane);
                     }
                     return planes;
@@ -228,7 +255,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
             return null;
         }
 
-        public async Task<IList<Plane>> GetPlanesByArrivalDetail(string arrivalAirport)
+        public async Task<IList<Plane>> GetPlanesByArrivalDetail(string arrivalAirport, bool getStatusAndWeather = false)
         {
             List<Plane> planes = new List<Plane>();
             
@@ -236,13 +263,14 @@ namespace SW_SkyScanner_WebService.Services.Planes
             long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlArrival}?airport={arrivalAirport}" +
                                                             $"&begin={currentTime - HourDetectionLimit * 3600}" +
-                                                            $"&end={currentTime + HourDetectionLimit * 3600}")
+                                                            $"&end={currentTime}")
                 .GetAwaiter().GetResult();
             
             // 2. Parse the JSON response into a list of Plane objects.
             if (response.IsSuccessStatusCode)
             {
                 dynamic dynPlanes = JArray.Parse(await response.Content.ReadAsStringAsync());
+                int limit = 0;
                 try
                 {
                     /* Create the plane object AND also:
@@ -254,20 +282,34 @@ namespace SW_SkyScanner_WebService.Services.Planes
                     foreach (dynamic planeJson in dynPlanes)
                     {
                         // Limit how many planes we track
-                        if (planes.Count >= PlanesLimit)
+                        if (!getStatusAndWeather && limit >= PlanesLimitStandard || getStatusAndWeather && limit >= PlanesLimit)
                             break;
                         
                         Plane plane = new Plane(planeJson);
-                        plane.Status = await GetPlaneStatus(plane.Icao24);
                         plane.DepartureAirport = await _airportWs.GetAirport(plane.DepartureAirportCode);
                         plane.ArrivalAirport = await _airportWs.GetAirport(plane.ArrivalAirportCode);
-                        if (plane.Status != null)
-                            plane.Weather = await _weatherWs.GetWeatherByCoordinate(plane.Status.Location);
-
+                        if (getStatusAndWeather)
+                        {
+                            plane.Status = await GetPlaneStatus(plane.Icao24);
+                            if (plane.Status != null && plane.Status.Location != null)
+                            { 
+                                plane.Weather = await _weatherWs.GetWeatherByCoordinate(plane.Status.Location);
+                            }
+                            
+                            if (plane.DepartureAirport != null)
+                                plane.DepartureAirport.Weather =
+                                    await _weatherWs.GetWeatherByCoordinate(plane.DepartureAirport.Location);
+                            
+                            if (plane.ArrivalAirport != null)
+                                plane.ArrivalAirport.Weather =
+                                    await _weatherWs.GetWeatherByCoordinate(plane.ArrivalAirport.Location);
+                        }
+                        
                         planes.Add(plane);
-                    }
 
-                    return planes;
+                        limit++;
+                    }
+                    return planes.OrderBy(p => p.ArrivalTime).ToList();
                 }
                 catch (Exception)
                 {
@@ -309,8 +351,9 @@ namespace SW_SkyScanner_WebService.Services.Planes
                     {
                         planes.Add(new Plane {Status = new PlaneStatus(statusJson)});
                     }
-
-                    return planes;
+                    
+                    // Return the planes whose coordinates we have and that are flying (not on ground)
+                    return planes.Where(p => p.Status.Location != null && !p.Status.OnGround).ToList();
                 }
                 catch (Exception)
                 {

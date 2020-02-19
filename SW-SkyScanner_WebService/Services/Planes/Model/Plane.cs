@@ -12,10 +12,14 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
             Icao24 = dynPlane.icao24;
             DepartureAirportCode = dynPlane.estDepartureAirport;
             ArrivalAirportCode = dynPlane.estArrivalAirport;
-            DepartureTime = (int) dynPlane.firstSeen;
-            ArrivalTime = (int) dynPlane.lastSeen;
-            DepartureDistance = (int)dynPlane.estDepartureAirportHorizDistance;
-            ArrivalDistance = (int)dynPlane.estArrivalAirportHorizDistance;
+            if (dynPlane.firstSeen != null)
+                DepartureTime = (int) dynPlane.firstSeen;
+            if (dynPlane.lastSeen != null)
+                ArrivalTime = (int) dynPlane.lastSeen;
+            if (dynPlane.estDepartureAirportHorizDistance != null)
+                DepartureDistance = (int)dynPlane.estDepartureAirportHorizDistance;
+            if (dynPlane.estArrivalAirportHorizDistance != null)
+                ArrivalDistance = (int)dynPlane.estArrivalAirportHorizDistance;
         }
 
         /// <summary>
@@ -72,5 +76,15 @@ namespace SW_SkyScanner_WebService.Services.Planes.Model
         /// Estimated distance between the plane and the arrival airport (meters)
         /// </summary>
         public int ArrivalDistance { get; set; }
+
+        public override string ToString()
+        {
+            return $"Plane =>\n\t{nameof(Status)}: {Status}, {nameof(Icao24)}: {Icao24}, {nameof(DepartureAirport)}: " +
+                   $"{DepartureAirport}, {nameof(DepartureAirportCode)}: {DepartureAirportCode}, " +
+                   $"{nameof(ArrivalAirport)}: {ArrivalAirport}, {nameof(ArrivalAirportCode)}: " +
+                   $"{ArrivalAirportCode}, {nameof(Weather)}: {Weather}, {nameof(DepartureTime)}: {DepartureTime}, " +
+                   $"{nameof(ArrivalTime)}: {ArrivalTime}, {nameof(DepartureDistance)}: {DepartureDistance}, " +
+                   $"{nameof(ArrivalDistance)}: {ArrivalDistance}";
+        }
     }
 }

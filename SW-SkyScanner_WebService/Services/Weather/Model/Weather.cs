@@ -76,5 +76,15 @@ namespace SW_SkyScanner_WebService.Services.Weather.Model
         /// Cloudiness (%)
         /// </summary>
         public int Cloudiness { get; set; }
+
+
+        public override string ToString()
+        {
+            return $"Weather status =>\n\t{nameof(Time)}: {Time}, {nameof(Main)}: {Main}, {nameof(Description)}: " +
+                   $"{Description}, {nameof(Temperature)}: {Temperature}, {nameof(TemperatureMax)}: " +
+                   $"{TemperatureMax}, {nameof(TemperatureMin)}: {TemperatureMin}, {nameof(Pressure)}: " +
+                   $"{Pressure}, {nameof(Humidity)}: {Humidity}, {nameof(WindSpeed)}: {WindSpeed}, " +
+                   $"{nameof(WindDirection)}: {WindDirection}, {nameof(Cloudiness)}: {Cloudiness}";
+        }
     }
 }
