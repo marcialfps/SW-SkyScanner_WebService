@@ -55,7 +55,7 @@ namespace SW_SkyScanner_WebService
             throw new NotImplementedException();
         }*/
 
-        [WebMethod]
+        /*[WebMethod]
         public User GetUser(string username)
         {
             User user = _userWs.GetUser(username).GetAwaiter().GetResult();
@@ -67,7 +67,7 @@ namespace SW_SkyScanner_WebService
             
             HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
             return user;
-        }
+        }*/
         
         [WebMethod]
         public User Login(string username, string password)
