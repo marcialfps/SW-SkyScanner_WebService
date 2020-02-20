@@ -80,7 +80,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return user;
         }
         
@@ -103,7 +103,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Created;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return user;
         }
         
@@ -162,7 +162,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return airport;
         }
         
@@ -180,7 +180,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return airportCoordinate;
         }
         
@@ -202,7 +202,7 @@ namespace SW_SkyScanner_WebService
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
                 return null;
             }
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return weather;
         }
         
@@ -220,7 +220,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return weather;
         }
         
@@ -242,7 +242,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return weather;
         }
         
@@ -263,7 +263,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return status;
         }
         
@@ -285,7 +285,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return planes.ToList();
         }
 
@@ -310,7 +310,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return planes.ToList();
         }
         
@@ -333,7 +333,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
 
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return planes.ToList();
         }
         
@@ -359,7 +359,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
 
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return planes.ToList();
         }
         
@@ -381,7 +381,7 @@ namespace SW_SkyScanner_WebService
                 return null;
             }
 
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
             return planes.ToList();
         }
     }
