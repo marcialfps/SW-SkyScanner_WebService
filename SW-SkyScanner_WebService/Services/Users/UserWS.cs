@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using SW_SkyScanner_WebService.Security;
 using SW_SkyScanner_WebService.Services.Users.Model;
 
 namespace SW_SkyScanner_WebService.Services.Users
@@ -8,14 +9,12 @@ namespace SW_SkyScanner_WebService.Services.Users
     public class UserWS : IUserWs
     {
         private HttpClient _client;
-        private AesEncryptor _encryptor;
         private string _apiBaseUrl;
 
         public UserWS()
         {
             _client = new HttpClient();
-            _encryptor = new AesEncryptor();
-            _apiBaseUrl = ""; // TODO url of the users web service
+            _apiBaseUrl = "http://localhost:8080/SW-SkyScanner_UsersWebClient/usersapi/users";
         }
         
         public async Task<User> GetUser(int id)
@@ -34,18 +33,19 @@ namespace SW_SkyScanner_WebService.Services.Users
         {
             User user = null;
             
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}/users/user/{username}")
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}/{username}")
                 .GetAwaiter().GetResult();
             if (response.IsSuccessStatusCode)
             {
                 user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
             }
             return user;
         }
         
         public async Task<User> GetUser(string username, string password)
         {
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}/users/user/{username}")
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}/{username}")
                 .GetAwaiter().GetResult();
             if (response.IsSuccessStatusCode)
             {
@@ -59,9 +59,8 @@ namespace SW_SkyScanner_WebService.Services.Users
         public async Task<User> CreateUser(User user)
         {
             // Create a copy of the user with encrypted credentials to be sent over the network
-            User secureUser = (User)user.Clone();
-            secureUser.Name = _encryptor.Encrypt(user.Name);
-            secureUser.Password = _encryptor.Encrypt(user.Password);
+            User secureUser = new User(user);
+            secureUser.Password = AesEncryptor.Encrypt(user.Password);
             
             HttpResponseMessage response = await _client.PostAsJsonAsync(
                 $"{_apiBaseUrl}/users", secureUser);
@@ -76,12 +75,11 @@ namespace SW_SkyScanner_WebService.Services.Users
         public async Task<User> UpdateUser(User user)
         {
             // Create a copy of the user with encrypted credentials to be sent over the network
-            User secureUser = (User)user.Clone();
-            secureUser.Name = _encryptor.Encrypt(user.Name);
-            secureUser.Password = _encryptor.Encrypt(user.Password);
+            User secureUser = new User(user);
+            secureUser.Password = AesEncryptor.Encrypt(user.Password);
             
             HttpResponseMessage response = await _client.PutAsJsonAsync(
-                $"{_apiBaseUrl}/users/{user.getId()}", user);
+                $"{_apiBaseUrl}/users/{user.Name}", user);
             
             response.EnsureSuccessStatusCode();
 
@@ -99,7 +97,8 @@ namespace SW_SkyScanner_WebService.Services.Users
         
         public async Task<bool> DeleteUser(User user)
         {
-            return await DeleteUser(user.getId());
+//            return await DeleteUser(user.getId());
+            return false;
         }
     }
 }

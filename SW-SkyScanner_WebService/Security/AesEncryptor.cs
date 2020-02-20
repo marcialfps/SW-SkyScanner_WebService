@@ -2,63 +2,52 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
 
-namespace SW_SkyScanner_WebService.Services.Users.Model
+
+namespace SW_SkyScanner_WebService.Security
 {
     public class AesEncryptor
     {
-        private const string Key = "servicioswebmiw2020";
-        public string Encrypt(string plainText, string key = Key)  
-        {  
-            byte[] iv = new byte[16];  
-            byte[] array;  
-  
-            using (Aes aes = Aes.Create())  
-            {  
-                aes.Key = Encoding.UTF8.GetBytes(key);  
-                aes.IV = iv;  
-  
-                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);  
-  
-                using (MemoryStream memoryStream = new MemoryStream())  
-                {  
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))  
-                    {  
-                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))  
-                        {  
-                            streamWriter.Write(plainText);  
-                        }  
-  
-                        array = memoryStream.ToArray();  
-                    }  
-                }  
-            }  
-  
-            return Convert.ToBase64String(array);  
-        }  
-  
-        public string Decrypt(string cipherText, string key = Key)  
-        {  
-            byte[] iv = new byte[16];  
-            byte[] buffer = Convert.FromBase64String(cipherText);  
-  
-            using (Aes aes = Aes.Create())  
-            {  
-                aes.Key = Encoding.UTF8.GetBytes(key);  
-                aes.IV = iv;  
-                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);  
-  
-                using (MemoryStream memoryStream = new MemoryStream(buffer))  
-                {  
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))  
-                    {  
-                        using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))  
-                        {  
-                            return streamReader.ReadToEnd();  
-                        }  
-                    }  
-                }  
-            }  
-        }  
+        private const string Key = "edumarcialmiw2020";
+        public static string Encrypt(string plainText, string key = Key)
+        {
+            var plainBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(Encrypt(plainBytes, getRijndaelManaged(key)));
+        }
+
+        public static string Decrypt(string encryptedText, string key = Key)
+        {
+            var encryptedBytes = Convert.FromBase64String(encryptedText);
+            return Encoding.UTF8.GetString(Decrypt(encryptedBytes, getRijndaelManaged(key)));
+        }
+
+        private static RijndaelManaged getRijndaelManaged(string secretKey)
+        {
+            var keyBytes = new byte[16];
+            var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
+            Array.Copy(secretKeyBytes, keyBytes, Math.Min(keyBytes.Length, secretKeyBytes.Length));
+            return new RijndaelManaged
+            {
+                Mode = CipherMode.CBC,
+                Padding = PaddingMode.PKCS7,
+                KeySize = 128,
+                BlockSize = 128,
+                Key = keyBytes,
+                IV = keyBytes
+            };
+        }
+
+        private static byte[] Encrypt(byte[] plainBytes, RijndaelManaged rijndaelManaged)
+        {
+            return rijndaelManaged.CreateEncryptor()
+                .TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+        }
+
+        private static byte[] Decrypt(byte[] encryptedData, RijndaelManaged rijndaelManaged)
+        {
+            return rijndaelManaged.CreateDecryptor()
+                .TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+        }
     } 
 }
