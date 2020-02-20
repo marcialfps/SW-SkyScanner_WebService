@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SW_SkyScanner_WebService.Security;
 using SW_SkyScanner_WebService.Services.Users.Model;
 
@@ -16,19 +17,7 @@ namespace SW_SkyScanner_WebService.Services.Users
             _client = new HttpClient();
             _apiBaseUrl = "http://localhost:8080/SW-SkyScanner_UsersWebClient/usersapi/users";
         }
-        
-        public async Task<User> GetUser(int id)
-        {
-            User user = null;
-            
-            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrl}/users/{id}").GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-            {
-                user = await response.Content.ReadAsAsync<User>();
-            }
-            return user;
-        }
-        
+
         public async Task<User> GetUser(string username)
         {
             User user = null;
@@ -50,12 +39,32 @@ namespace SW_SkyScanner_WebService.Services.Users
             if (response.IsSuccessStatusCode)
             {
                 User user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
                 if (password.Equals(user.Password))
                     return user;
             }
             return null;
         }
-        
+
+        public async Task<User> Login(string username, string password)
+        {
+            User user = new User();
+            user.Username = username;
+            user.Password = AesEncryptor.Encrypt(password);
+
+            HttpResponseMessage response = await _client.PostAsJsonAsync(
+                $"{_apiBaseUrl}/{username}", user);
+            
+            if (response.StatusCode == HttpStatusCode.Accepted)
+            {
+                user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
+                if (password.Equals(user.Password))
+                    return user;
+            }
+            return null;
+        }
+
         public async Task<User> CreateUser(User user)
         {
             // Create a copy of the user with encrypted credentials to be sent over the network
@@ -63,13 +72,16 @@ namespace SW_SkyScanner_WebService.Services.Users
             secureUser.Password = AesEncryptor.Encrypt(user.Password);
             
             HttpResponseMessage response = await _client.PostAsJsonAsync(
-                $"{_apiBaseUrl}/users", secureUser);
-            
-            // Exception if the server does noe return an OK code.
-            response.EnsureSuccessStatusCode(); 
+                $"{_apiBaseUrl}", secureUser);
 
-            // Return the original user if success
-            return user;
+            if (response.StatusCode == HttpStatusCode.Created)
+            {
+                user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
+                return user;
+            }
+            
+            return null;
         }
         
         public async Task<User> UpdateUser(User user)
@@ -79,26 +91,39 @@ namespace SW_SkyScanner_WebService.Services.Users
             secureUser.Password = AesEncryptor.Encrypt(user.Password);
             
             HttpResponseMessage response = await _client.PutAsJsonAsync(
-                $"{_apiBaseUrl}/users/{user.Name}", user);
-            
-            response.EnsureSuccessStatusCode();
+                $"{_apiBaseUrl}/{user.Username}", secureUser);
 
-            // Return the original user if success
-            return user;
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
+                return user;
+            }
+            
+            return null;
         }
 
-        public async Task<bool> DeleteUser(int id)
+        public async Task<User> DeleteUser(string username, string password)
         {
-            HttpResponseMessage response = await _client.DeleteAsync($"api/products/{id}");
+            // Create a copy of the user with encrypted credentials to be sent over the network
+            password = AesEncryptor.Encrypt(password);
             
-            // Code 204.
-            return response.StatusCode == HttpStatusCode.NoContent;
+            HttpResponseMessage response = await _client.DeleteAsync(
+                $"{_apiBaseUrl}/{username}");
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                User user = await response.Content.ReadAsAsync<User>();
+                user.Password = AesEncryptor.Decrypt(user.Password);
+                return user;
+            }
+            
+            return null;
         }
         
-        public async Task<bool> DeleteUser(User user)
+        public Task<User> DeleteUser(User user)
         {
-//            return await DeleteUser(user.getId());
-            return false;
+            return DeleteUser(user.Username, user.Password);
         }
     }
 }

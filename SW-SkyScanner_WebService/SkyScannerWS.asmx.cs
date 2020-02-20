@@ -56,12 +56,6 @@ namespace SW_SkyScanner_WebService
         }*/
 
         [WebMethod]
-        public User AddUser(string username, string password, string airportCode)
-        {
-            throw new NotImplementedException();
-        }
-        
-        [WebMethod]
         public User GetUser(string username)
         {
             User user = _userWs.GetUser(username).GetAwaiter().GetResult();
@@ -74,6 +68,45 @@ namespace SW_SkyScanner_WebService
             HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
             return user;
         }
+        
+        [WebMethod]
+        public User Login(string username, string password)
+        {
+            // TODO
+            User user = _userWs.GetUser(username, password).GetAwaiter().GetResult();
+            if (user == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return user;
+        }
+        
+        [WebMethod]
+        public User AddUser(string username, string name, string surname, string password, string mail, string airport)
+        {
+            User user = new User
+            {
+                Username = username,
+                Name = name,
+                Surname = surname,
+                Password = password,
+                Mail = mail,
+                Airport = airport
+            };
+            user = _userWs.CreateUser(user).GetAwaiter().GetResult();
+            if (user == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            return user;
+        }
+        
         
         [WebMethod]
         public User EditUser(string username, string password, string airportCode)

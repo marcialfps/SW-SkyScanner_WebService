@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.WebUtilities;
 
 
 namespace SW_SkyScanner_WebService.Security
