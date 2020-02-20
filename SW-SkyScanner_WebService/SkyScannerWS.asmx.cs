@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -19,7 +18,8 @@ namespace SW_SkyScanner_WebService
     /// SkyScannerWS offers functionality to track planes and get planes and airports information (including
     /// coordinates, weather, etc.)
     /// </summary>
-    [WebService(Namespace = "http://ws.skyscanner/")]
+    [WebService(Namespace = "http://ws.skyscanner/", Description = "Set of utilities for querying the status of" +
+                                                                   "airports and aircraft.")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // Para permitir que se llame a este servicio web desde un script, usando ASP.NET AJAX, quite la marca de comentario de la línea siguiente. 
