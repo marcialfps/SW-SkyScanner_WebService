@@ -10,14 +10,28 @@ namespace SW_SkyScanner_WebService.Security
         private const string Key = "edumarcialmiw2020";
         public static string Encrypt(string plainText, string key = Key)
         {
-            var plainBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(Encrypt(plainBytes, getRijndaelManaged(key)));
+            try
+            {
+                var plainBytes = Encoding.UTF8.GetBytes(plainText);
+                return Convert.ToBase64String(Encrypt(plainBytes, getRijndaelManaged(key)));
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static string Decrypt(string encryptedText, string key = Key)
         {
-            var encryptedBytes = Convert.FromBase64String(encryptedText);
-            return Encoding.UTF8.GetString(Decrypt(encryptedBytes, getRijndaelManaged(key)));
+            try
+            {
+                var encryptedBytes = Convert.FromBase64String(encryptedText);
+                return Encoding.UTF8.GetString(Decrypt(encryptedBytes, getRijndaelManaged(key)));
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static RijndaelManaged getRijndaelManaged(string secretKey)

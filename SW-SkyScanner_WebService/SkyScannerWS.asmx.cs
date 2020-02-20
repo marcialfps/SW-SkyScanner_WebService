@@ -99,25 +99,50 @@ namespace SW_SkyScanner_WebService
             user = _userWs.CreateUser(user).GetAwaiter().GetResult();
             if (user == null)
             {
-                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Conflict;
                 return null;
             }
             
-            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Accepted;
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Created;
             return user;
         }
         
         
         [WebMethod]
-        public User EditUser(string username, string password, string airportCode)
+        public User EditUser(string username, string name, string surname, string password, string mail, string airport)
         {
-            throw new NotImplementedException();
+            User user = new User
+            {
+                Username = username,
+                Name = name,
+                Surname = surname,
+                Password = password,
+                Mail = mail,
+                Airport = airport
+            };
+            user = _userWs.UpdateUser(user).GetAwaiter().GetResult();
+            if (user == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
+            return user;
         }
         
         [WebMethod]
-        public User DeleteUser(string username)
+        public User DeleteUser(string username, string password)
         {
-            throw new NotImplementedException();
+            User user = _userWs.DeleteUser(username, password).GetAwaiter().GetResult();
+            if (user == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
+            return user;
         }
 
         /// <summary>
