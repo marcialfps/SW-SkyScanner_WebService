@@ -19,7 +19,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
         /// e.g.: a limit of 5 hours means we'll ask for plane data arriving/departing from (current time - 5 hours)
         /// to (current time + 5 hours).
         /// </summary>
-        private const int HourDetectionLimit = 24;
+        private const int HourDetectionLimit = 30;
         
         /// <summary>
         /// Limit the amount of planes we can retrieve at a time when fetching detailed info

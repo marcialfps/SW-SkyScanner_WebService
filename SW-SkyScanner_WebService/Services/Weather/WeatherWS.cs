@@ -88,6 +88,42 @@ namespace SW_SkyScanner_WebService.Services.Weather
 
             return null;
         }
+        
+        public async Task<List<Model.Weather>> GetForecastByAirport(string airport)
+        {
+            // 1. Get airport coordinates
+            Coordinate coordinate = await _airportWs.GetAirportCoordinates(airport);
+            if (coordinate == null)
+                return null;
+            
+            // 2. Request weather forecast in obtained coordinates
+            HttpResponseMessage response = _client.GetAsync($"{_apiBaseUrlForecast}&lat={(coordinate.Latitude).ToString(CultureInfo.InvariantCulture)}&" +
+                                                            $"lon={(coordinate.Longitude).ToString(CultureInfo.InvariantCulture)}").GetAwaiter().GetResult();
+
+            // 3. Arrange all the weather predictions into a list of weather objects
+            IList<Model.Weather> weathers = new List<Model.Weather>();
+            if (response.IsSuccessStatusCode)
+            {
+                weathers = new List<Model.Weather>();
+                dynamic dynWeathers = JObject.Parse(await response.Content.ReadAsStringAsync());
+                try
+                {
+                    foreach (dynamic predictedWeather in dynWeathers.list)
+                    {
+                        weathers.Add(new Model.Weather(predictedWeather));
+                    }
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+            // 3. For all the weather objects stored, return the prediction whose time is closer to the requested time
+            if (weathers.Count > 0)
+                return weathers.ToList();
+
+            return null;
+        }
 
         public async Task<Model.Weather> GetWeatherByCoordinate(Coordinate coordinate)
         {

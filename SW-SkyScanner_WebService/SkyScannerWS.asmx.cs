@@ -72,7 +72,6 @@ namespace SW_SkyScanner_WebService
         [WebMethod]
         public User Login(string username, string password)
         {
-            // TODO
             User user = _userWs.GetUser(username, password).GetAwaiter().GetResult();
             if (user == null)
             {
@@ -236,6 +235,27 @@ namespace SW_SkyScanner_WebService
         public Weather GetWeatherForecastByAirport(string airportCode, int time)
         {
             Weather weather = _weatherWs.GetForecastByAirport(airportCode, time).GetAwaiter().GetResult();
+            if (weather == null)
+            {
+                HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                return null;
+            }
+            
+            HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.OK;
+            return weather;
+        }
+        
+        /// <summary>
+        /// Contacts the "OpenWeatherMap" API (https://openweathermap.org/api) and retrieves
+        /// the predicted weather for the given airport for the following 5 days (3 hour intervals)
+        /// </summary>
+        /// <param name="airportCode">Airport for which the weather is requested</param>
+        /// <returns>A serialized Weather object (<see cref="Weather"/>) if the weather was found (code 202)
+        /// or null if the coordinates were wrong or the weather was not found (code 404)</returns>
+        [WebMethod]
+        public List<Weather> GetFullWeatherForecastByAirport(string airportCode)
+        {
+            List<Weather> weather = _weatherWs.GetForecastByAirport(airportCode).GetAwaiter().GetResult();
             if (weather == null)
             {
                 HttpContext.Current.Response.StatusCode = (int) HttpStatusCode.NotFound;

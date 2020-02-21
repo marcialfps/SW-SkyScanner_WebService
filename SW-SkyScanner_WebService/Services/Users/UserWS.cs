@@ -50,6 +50,8 @@ namespace SW_SkyScanner_WebService.Services.Users
             if (response.IsSuccessStatusCode)
             {
                 User user = await response.Content.ReadAsAsync<User>();
+                if (user == null)
+                    return null;
                 user.Password = AesEncryptor.Decrypt(user.Password);
                 if (!string.IsNullOrEmpty(user.Password) && password.Equals(user.Password))
                     return user;
