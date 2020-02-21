@@ -29,7 +29,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
         /// <summary>
         /// Limit the amount of planes we can retrieve at a time when not fetching detailed info
         /// </summary>
-        private const int PlanesLimitStandard = 20;
+        private const int PlanesLimitStandard = 30;
         
         /// <summary>
         /// When searching for planes on a given coordinate, limit how far the planes can be from the coordinate
@@ -339,7 +339,7 @@ namespace SW_SkyScanner_WebService.Services.Planes
                                                             $"lamin={(coordinate.Latitude - CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
                                                             $"lamax={(coordinate.Latitude + CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
                                                             $"lomin={(coordinate.Longitude - CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}&" +
-                                                            $"lomax={(coordinate.Latitude + CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}")
+                                                            $"lomax={(coordinate.Longitude + CoordinatesThreshold).ToString(CultureInfo.InvariantCulture)}")
                 .GetAwaiter().GetResult();
             
             IList<Plane> planes = new List<Plane>();
