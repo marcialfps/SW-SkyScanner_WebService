@@ -20,6 +20,8 @@ namespace SW_SkyScanner_WebService.Services.Users
         {
             _client = new HttpClient();
             _apiBaseUrl = "http://localhost:8080/SW-SkyScanner_UsersWebClient/usersapi/users";
+//            _apiBaseUrl = "http://156.35.95.125:8080/SW-SkyScanner_UsersWebClient-0.0.1-SNAPSHOT/usersapi/users";
+//            _apiBaseUrl = "http://156.35.95.128:8080/SW-SkyScanner_UsersWebClient-0.0.1-SNAPSHOT/usersapi/users";
             
             // We need to send our user properties in lowe case to match properties of the users in the Java app
             _lowerCaseJsonSerializer = new JsonSerializerSettings();
